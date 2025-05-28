@@ -27,7 +27,7 @@ export const AlertSystem = () => {
           className={`${
             alert.type === "danger" 
               ? "bg-red-900/90 border-red-500 text-red-100" 
-              : "bg-blue-900/90 border-blue-500 text-blue-100"
+              : "bg-green-900/90 border-green-500 text-green-100"
           } backdrop-blur-lg animate-in slide-in-from-right-full`}
         >
           {alert.type === "danger" ? (

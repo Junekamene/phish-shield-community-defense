@@ -28,11 +28,11 @@ export const ThreatDashboard = () => {
         <ThreatMap />
       </div>
 
-      <Card className="bg-black/40 border-purple-500/30 backdrop-blur-lg">
+      <Card className="bg-black/60 border-green-500/30 backdrop-blur-lg">
         <CardHeader>
           <CardTitle className="text-white flex items-center justify-between">
             Recent Threat Detections
-            <Badge variant="outline" className="border-cyan-400 text-cyan-400">
+            <Badge variant="outline" className="border-green-400 text-green-400">
               Live Feed
             </Badge>
           </CardTitle>
@@ -41,7 +41,7 @@ export const ThreatDashboard = () => {
           {threats.slice(0, 10).map((threat) => (
             <div
               key={threat.id}
-              className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg border border-slate-700/50 hover:border-purple-500/50 transition-all"
+              className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-800/50 hover:border-green-500/50 transition-all"
             >
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
@@ -54,22 +54,22 @@ export const ThreatDashboard = () => {
                     {threat.riskLevel}
                   </Badge>
                 </div>
-                <p className="text-slate-400 text-sm mt-1 truncate max-w-md">
+                <p className="text-green-300 text-sm mt-1 truncate max-w-md">
                   {threat.content}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-slate-400 text-xs">
+                <p className="text-green-400 text-xs">
                   {threat.timestamp.toLocaleTimeString()}
                 </p>
                 {threat.location && (
-                  <p className="text-slate-500 text-xs">{threat.location}</p>
+                  <p className="text-green-500 text-xs">{threat.location}</p>
                 )}
               </div>
             </div>
           ))}
           {threats.length === 0 && (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-8 text-green-400">
               No threats detected yet. Submit a URL or email to test the system.
             </div>
           )}
