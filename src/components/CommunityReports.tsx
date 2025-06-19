@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,8 @@ export const CommunityReports = () => {
       risk_level: "medium",
       verified: false,
       votes: 1,
-      location: "Community Report"
+      location: "Community Report",
+      created_at: new Date().toISOString()
     });
     
     setIsSubmitting(false);
