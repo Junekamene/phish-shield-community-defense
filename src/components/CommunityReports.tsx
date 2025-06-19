@@ -30,7 +30,7 @@ export const CommunityReports = () => {
     addThreat({
       type: "community",
       content: reportUrl,
-      riskLevel: "medium",
+      risk_level: "medium",
       verified: false,
       votes: 1,
       location: "Community Report"
