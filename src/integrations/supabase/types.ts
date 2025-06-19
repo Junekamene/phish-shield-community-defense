@@ -9,7 +9,149 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      alerts: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean | null
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean | null
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean | null
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      community_reports: {
+        Row: {
+          created_at: string
+          id: string
+          status: string | null
+          threat_id: string | null
+          url: string
+          user_id: string | null
+          votes: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          status?: string | null
+          threat_id?: string | null
+          url: string
+          user_id?: string | null
+          votes?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          status?: string | null
+          threat_id?: string | null
+          url?: string
+          user_id?: string | null
+          votes?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_reports_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "threats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      threat_analytics: {
+        Row: {
+          blocked_attacks: number | null
+          created_at: string
+          critical_threats: number | null
+          date: string
+          high_threats: number | null
+          id: string
+          low_threats: number | null
+          medium_threats: number | null
+          total_threats: number | null
+        }
+        Insert: {
+          blocked_attacks?: number | null
+          created_at?: string
+          critical_threats?: number | null
+          date?: string
+          high_threats?: number | null
+          id?: string
+          low_threats?: number | null
+          medium_threats?: number | null
+          total_threats?: number | null
+        }
+        Update: {
+          blocked_attacks?: number | null
+          created_at?: string
+          critical_threats?: number | null
+          date?: string
+          high_threats?: number | null
+          id?: string
+          low_threats?: number | null
+          medium_threats?: number | null
+          total_threats?: number | null
+        }
+        Relationships: []
+      }
+      threats: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          location: string | null
+          metadata: Json | null
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          type: Database["public"]["Enums"]["threat_type"]
+          updated_at: string
+          user_id: string | null
+          verified: boolean | null
+          votes: number | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          type: Database["public"]["Enums"]["threat_type"]
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean | null
+          votes?: number | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          type?: Database["public"]["Enums"]["threat_type"]
+          updated_at?: string
+          user_id?: string | null
+          verified?: boolean | null
+          votes?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +160,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      risk_level: "low" | "medium" | "high" | "critical"
+      threat_type: "url" | "email" | "community" | "ai_detected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +276,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      risk_level: ["low", "medium", "high", "critical"],
+      threat_type: ["url", "email", "community", "ai_detected"],
+    },
   },
 } as const

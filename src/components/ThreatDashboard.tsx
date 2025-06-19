@@ -5,9 +5,10 @@ import { useThreat } from "@/context/ThreatContext";
 import { ThreatMetrics } from "./ThreatMetrics";
 import { ThreatMap } from "./ThreatMap";
 import { RealtimeChart } from "./RealtimeChart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const ThreatDashboard = () => {
-  const { threats, stats } = useThreat();
+  const { threats, stats, loading } = useThreat();
 
   const getRiskColor = (level: string) => {
     switch (level) {
@@ -18,6 +19,19 @@ export const ThreatDashboard = () => {
       default: return "bg-gray-500";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-32 w-full bg-gray-800/50" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Skeleton className="h-64 w-full bg-gray-800/50" />
+          <Skeleton className="h-64 w-full bg-gray-800/50" />
+        </div>
+        <Skeleton className="h-96 w-full bg-gray-800/50" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -45,13 +59,13 @@ export const ThreatDashboard = () => {
             >
               <div className="flex-1">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${getRiskColor(threat.riskLevel)}`}></div>
+                  <div className={`w-3 h-3 rounded-full ${getRiskColor(threat.risk_level)}`}></div>
                   <span className="text-white font-medium capitalize">{threat.type}</span>
                   <Badge 
                     variant="outline" 
-                    className={`${getRiskColor(threat.riskLevel)} border-0 text-white text-xs`}
+                    className={`${getRiskColor(threat.risk_level)} border-0 text-white text-xs`}
                   >
-                    {threat.riskLevel}
+                    {threat.risk_level}
                   </Badge>
                 </div>
                 <p className="text-green-300 text-sm mt-1 truncate max-w-md">

@@ -1,67 +1,28 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
-
-export interface ThreatData {
-  id: string;
-  type: "email" | "url" | "community";
-  content: string;
-  riskLevel: "low" | "medium" | "high" | "critical";
-  timestamp: Date;
-  location?: string;
-  verified: boolean;
-  votes: number;
-}
-
-export interface ThreatStats {
-  totalThreats: number;
-  blockedToday: number;
-  accuracy: number;
-  activeUsers: number;
-}
+import { useSupabaseThreats, ThreatData, ThreatStats } from "@/hooks/useSupabaseThreats";
 
 interface ThreatContextType {
   threats: ThreatData[];
   stats: ThreatStats;
-  addThreat: (threat: Omit<ThreatData, "id" | "timestamp">) => void;
+  loading: boolean;
+  analyzeThreat: (content: string, type: 'url' | 'email') => Promise<any>;
+  submitCommunityReport: (url: string, description: string) => Promise<any>;
   alerts: Array<{ id: string; message: string; type: string; timestamp: Date }>;
   addAlert: (message: string, type: string) => void;
   removeAlert: (id: string) => void;
+  addThreat: (threat: Omit<ThreatData, "id" | "timestamp">) => void; // Keep for backward compatibility
 }
 
 const ThreatContext = createContext<ThreatContextType | undefined>(undefined);
 
 export const ThreatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [threats, setThreats] = useState<ThreatData[]>([]);
+  const { threats, stats, loading, analyzeThreat, submitCommunityReport } = useSupabaseThreats();
   const [alerts, setAlerts] = useState<Array<{ id: string; message: string; type: string; timestamp: Date }>>([]);
-  
-  const [stats, setStats] = useState<ThreatStats>({
-    totalThreats: 1247,
-    blockedToday: 89,
-    accuracy: 94.7,
-    activeUsers: 342
-  });
 
+  // Keep for backward compatibility with existing components
   const addThreat = (threat: Omit<ThreatData, "id" | "timestamp">) => {
-    const newThreat: ThreatData = {
-      ...threat,
-      id: Math.random().toString(36).substr(2, 9),
-      timestamp: new Date()
-    };
-    
-    setThreats(prev => [newThreat, ...prev.slice(0, 49)]);
-    setStats(prev => ({
-      ...prev,
-      totalThreats: prev.totalThreats + 1,
-      blockedToday: prev.blockedToday + 1
-    }));
-
-    // Add alert for high-risk threats
-    if (threat.riskLevel === "high" || threat.riskLevel === "critical") {
-      addAlert(
-        `${threat.riskLevel.toUpperCase()} THREAT DETECTED: ${threat.type} submission flagged`,
-        "danger"
-      );
-    }
+    // This is now handled by the backend, but we keep the function for compatibility
+    console.log('addThreat called - now handled by backend');
   };
 
   const addAlert = (message: string, type: string) => {
@@ -78,23 +39,13 @@ export const ThreatProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setAlerts(prev => prev.filter(alert => alert.id !== id));
   };
 
-  // Simulate real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setStats(prev => ({
-        ...prev,
-        activeUsers: prev.activeUsers + Math.floor(Math.random() * 3) - 1,
-        accuracy: Math.max(90, Math.min(99, prev.accuracy + (Math.random() - 0.5) * 0.1))
-      }));
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
     <ThreatContext.Provider value={{
       threats,
       stats,
+      loading,
+      analyzeThreat,
+      submitCommunityReport,
       addThreat,
       alerts,
       addAlert,

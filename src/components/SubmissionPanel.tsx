@@ -7,15 +7,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useThreat } from "@/context/ThreatContext";
-import { CloudUpload, AlertTriangle, CheckCircle } from "lucide-react";
+import { CloudUpload, AlertTriangle, CheckCircle, Loader } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export const SubmissionPanel = () => {
   const [urlInput, setUrlInput] = useState("");
   const [emailContent, setEmailContent] = useState("");
+  const [communityUrl, setCommunityUrl] = useState("");
+  const [communityDescription, setCommunityDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastResult, setLastResult] = useState<{ type: string; risk: string; details: string } | null>(null);
   
-  const { addThreat } = useThreat();
+  const { analyzeThreat, submitCommunityReport } = useThreat();
+  const { toast } = useToast();
 
   const analyzeUrl = async () => {
     if (!urlInput.trim()) return;
@@ -23,38 +27,39 @@ export const SubmissionPanel = () => {
     setIsAnalyzing(true);
     console.log("Analyzing URL:", urlInput);
     
-    // Simulate AI analysis
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const riskLevels = ["low", "medium", "high", "critical"] as const;
-    const randomRisk = riskLevels[Math.floor(Math.random() * riskLevels.length)];
-    
-    const analysisResults = {
-      low: "URL appears safe. No suspicious patterns detected.",
-      medium: "Some minor red flags detected. Exercise caution.",
-      high: "Multiple phishing indicators found. Likely malicious!",
-      critical: "DANGER: Confirmed phishing site with active threats!"
-    };
+    try {
+      const result = await analyzeThreat(urlInput, 'url');
+      
+      const analysisDetails = {
+        low: "URL appears safe. No suspicious patterns detected.",
+        medium: "Some minor red flags detected. Exercise caution.",
+        high: "Multiple phishing indicators found. Likely malicious!",
+        critical: "DANGER: Confirmed phishing site with active threats!"
+      };
 
-    const result = {
-      type: "URL Analysis",
-      risk: randomRisk,
-      details: analysisResults[randomRisk]
-    };
-    
-    setLastResult(result);
-    
-    addThreat({
-      type: "url",
-      content: urlInput,
-      riskLevel: randomRisk,
-      verified: true,
-      votes: 0,
-      location: "Unknown"
-    });
-    
-    setIsAnalyzing(false);
-    setUrlInput("");
+      setLastResult({
+        type: "URL Analysis",
+        risk: result.analysis.riskLevel,
+        details: result.analysis.recommendation
+      });
+
+      toast({
+        title: "URL Analysis Complete",
+        description: `Risk Level: ${result.analysis.riskLevel.toUpperCase()}`,
+        variant: result.analysis.riskLevel === 'high' || result.analysis.riskLevel === 'critical' ? "destructive" : "default"
+      });
+      
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to analyze URL. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+      setUrlInput("");
+    }
   };
 
   const analyzeEmail = async () => {
@@ -63,37 +68,59 @@ export const SubmissionPanel = () => {
     setIsAnalyzing(true);
     console.log("Analyzing email content");
     
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    
-    const riskLevels = ["low", "medium", "high", "critical"] as const;
-    const randomRisk = riskLevels[Math.floor(Math.random() * riskLevels.length)];
-    
-    const analysisResults = {
-      low: "Email appears legitimate. No phishing patterns detected.",
-      medium: "Some suspicious elements found. Verify sender identity.",
-      high: "Strong phishing indicators detected. Do not click links!",
-      critical: "ALERT: Advanced phishing attack detected!"
-    };
+    try {
+      const result = await analyzeThreat(emailContent, 'email');
+      
+      setLastResult({
+        type: "Email Analysis",
+        risk: result.analysis.riskLevel,
+        details: result.analysis.recommendation
+      });
 
-    const result = {
-      type: "Email Analysis",
-      risk: randomRisk,
-      details: analysisResults[randomRisk]
-    };
+      toast({
+        title: "Email Analysis Complete",
+        description: `Risk Level: ${result.analysis.riskLevel.toUpperCase()}`,
+        variant: result.analysis.riskLevel === 'high' || result.analysis.riskLevel === 'critical' ? "destructive" : "default"
+      });
+      
+    } catch (error) {
+      console.error('Analysis failed:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Unable to analyze email. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+      setEmailContent("");
+    }
+  };
+
+  const handleCommunitySubmission = async () => {
+    if (!communityUrl.trim() || !communityDescription.trim()) return;
     
-    setLastResult(result);
+    setIsAnalyzing(true);
     
-    addThreat({
-      type: "email",
-      content: emailContent.substring(0, 100) + "...",
-      riskLevel: randomRisk,
-      verified: true,
-      votes: 0,
-      location: "Unknown"
-    });
-    
-    setIsAnalyzing(false);
-    setEmailContent("");
+    try {
+      await submitCommunityReport(communityUrl, communityDescription);
+      
+      toast({
+        title: "Report Submitted",
+        description: "Thank you for contributing to community safety!",
+      });
+      
+      setCommunityUrl("");
+      setCommunityDescription("");
+    } catch (error) {
+      console.error('Submission failed:', error);
+      toast({
+        title: "Submission Failed",
+        description: "Unable to submit report. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const getRiskIcon = (risk: string) => {
@@ -126,9 +153,10 @@ export const SubmissionPanel = () => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="url" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-800/50">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50">
             <TabsTrigger value="url" className="data-[state=active]:bg-purple-600">URL Scanner</TabsTrigger>
             <TabsTrigger value="email" className="data-[state=active]:bg-purple-600">Email Analysis</TabsTrigger>
+            <TabsTrigger value="community" className="data-[state=active]:bg-purple-600">Report Threat</TabsTrigger>
           </TabsList>
           
           <TabsContent value="url" className="space-y-4">
@@ -144,7 +172,14 @@ export const SubmissionPanel = () => {
                 disabled={isAnalyzing || !urlInput.trim()}
                 className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
               >
-                {isAnalyzing ? "Analyzing..." : "Analyze URL"}
+                {isAnalyzing ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  "Analyze URL"
+                )}
               </Button>
             </div>
           </TabsContent>
@@ -162,7 +197,45 @@ export const SubmissionPanel = () => {
                 disabled={isAnalyzing || !emailContent.trim()}
                 className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
               >
-                {isAnalyzing ? "Analyzing..." : "Analyze Email"}
+                {isAnalyzing ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  "Analyze Email"
+                )}
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="community" className="space-y-4">
+            <div className="space-y-3">
+              <Input
+                placeholder="Suspicious URL to report"
+                value={communityUrl}
+                onChange={(e) => setCommunityUrl(e.target.value)}
+                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400"
+              />
+              <Textarea
+                placeholder="Describe the threat (how you encountered it, what makes it suspicious...)"
+                value={communityDescription}
+                onChange={(e) => setCommunityDescription(e.target.value)}
+                className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 min-h-20"
+              />
+              <Button
+                onClick={handleCommunitySubmission}
+                disabled={isAnalyzing || !communityUrl.trim() || !communityDescription.trim()}
+                className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Report"
+                )}
               </Button>
             </div>
           </TabsContent>
