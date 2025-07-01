@@ -1,11 +1,14 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useThreat } from "@/context/ThreatContext";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 
 export const ThreatMap = () => {
   const { threats } = useThreat();
+  const navigate = useNavigate();
   const [threatLocations, setThreatLocations] = useState<Array<{
     country: string;
     threats: number;
@@ -53,10 +56,25 @@ export const ThreatMap = () => {
     setThreatLocations(locationArray);
   }, [threats]);
 
+  const handleViewAllOrigins = () => {
+    navigate('/threat-origins');
+  };
+
   return (
     <Card className="bg-black/40 border-purple-500/30 backdrop-blur-lg">
       <CardHeader>
-        <CardTitle className="text-white">Threat Origins</CardTitle>
+        <CardTitle className="text-white flex items-center justify-between">
+          <span>Threat Origins</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleViewAllOrigins}
+            className="text-slate-400 hover:text-white hover:bg-slate-800/50 p-2 h-8"
+          >
+            <ExternalLink className="w-4 h-4 mr-1" />
+            View All
+          </Button>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {threatLocations.length === 0 ? (

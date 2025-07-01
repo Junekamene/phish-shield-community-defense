@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import BlockedThreats from "./pages/BlockedThreats";
+import ThreatOrigins from "./pages/ThreatOrigins";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/signup" element={<Signup />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/blocked-threats" element={<BlockedThreats />} />
+          <Route path="/threat-origins" element={<ThreatOrigins />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
