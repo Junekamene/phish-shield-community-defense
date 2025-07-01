@@ -1,43 +1,84 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { useThreat } from "@/context/ThreatContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Users, Flag, CheckCircle } from "lucide-react";
+
+interface CommunityReport {
+  id: string;
+  url: string;
+  votes: number;
+  status: string;
+  created_at: string;
+}
 
 export const CommunityReports = () => {
   const [reportUrl, setReportUrl] = useState("");
+  const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addThreat } = useThreat();
+  const [communityReports, setCommunityReports] = useState<CommunityReport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { submitCommunityReport } = useThreat();
 
-  const communityReports = [
-    { url: "fake-bank-login.net", votes: 23, status: "verified" },
-    { url: "phishing-paypal.com", votes: 18, status: "pending" },
-    { url: "malicious-update.org", votes: 31, status: "verified" },
-    { url: "fake-microsoft.net", votes: 12, status: "pending" }
-  ];
+  const fetchCommunityReports = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('community_reports')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(4);
 
-  const submitCommunityReport = async () => {
+      if (error) throw error;
+
+      setCommunityReports(data || []);
+    } catch (error) {
+      console.error('Error fetching community reports:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCommunityReports();
+
+    // Set up real-time subscription for new community reports
+    const channel = supabase
+      .channel('community-reports-changes')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'community_reports'
+      }, () => {
+        fetchCommunityReports();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const handleSubmitReport = async () => {
     if (!reportUrl.trim()) return;
     
     setIsSubmitting(true);
-    console.log("Submitting community report:", reportUrl);
+    console.log("Submitting community report:", reportUrl, description);
     
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    addThreat({
-      type: "community",
-      content: reportUrl,
-      risk_level: "medium",
-      verified: false,
-      votes: 1,
-      location: "Community Report",
-      created_at: new Date().toISOString()
-    });
-    
-    setIsSubmitting(false);
-    setReportUrl("");
+    try {
+      await submitCommunityReport(reportUrl, description || "Community reported threat");
+      setReportUrl("");
+      setDescription("");
+      // Reports will be refreshed via real-time subscription
+    } catch (error) {
+      console.error('Error submitting community report:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -56,8 +97,14 @@ export const CommunityReports = () => {
             onChange={(e) => setReportUrl(e.target.value)}
             className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400"
           />
+          <Textarea
+            placeholder="Optional: Describe the threat (e.g., phishing, malware)"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 min-h-[60px]"
+          />
           <Button
-            onClick={submitCommunityReport}
+            onClick={handleSubmitReport}
             disabled={isSubmitting || !reportUrl.trim()}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
           >
@@ -68,29 +115,42 @@ export const CommunityReports = () => {
 
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-slate-300 mb-3">Recent Community Reports</h4>
-          {communityReports.map((report, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-2 bg-slate-800/30 rounded border border-slate-700/50"
-            >
-              <div className="flex-1">
-                <p className="text-white text-sm truncate">{report.url}</p>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="text-xs text-slate-400">{report.votes} votes</span>
-                  <Badge 
-                    variant="outline" 
-                    className={report.status === "verified" 
-                      ? "border-green-400 text-green-400" 
-                      : "border-yellow-400 text-yellow-400"
-                    }
-                  >
-                    {report.status === "verified" && <CheckCircle className="w-3 h-3 mr-1" />}
-                    {report.status}
-                  </Badge>
+          {loading ? (
+            <div className="text-center py-4 text-slate-400">
+              Loading community reports...
+            </div>
+          ) : communityReports.length === 0 ? (
+            <div className="text-center py-4 text-slate-400">
+              No community reports yet. Be the first to report a threat!
+            </div>
+          ) : (
+            communityReports.map((report) => (
+              <div
+                key={report.id}
+                className="flex items-center justify-between p-2 bg-slate-800/30 rounded border border-slate-700/50"
+              >
+                <div className="flex-1">
+                  <p className="text-white text-sm truncate">{report.url}</p>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <span className="text-xs text-slate-400">{report.votes} votes</span>
+                    <Badge 
+                      variant="outline" 
+                      className={report.status === "verified" 
+                        ? "border-green-400 text-green-400" 
+                        : "border-yellow-400 text-yellow-400"
+                      }
+                    >
+                      {report.status === "verified" && <CheckCircle className="w-3 h-3 mr-1" />}
+                      {report.status}
+                    </Badge>
+                    <span className="text-xs text-slate-500">
+                      {new Date(report.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </CardContent>
     </Card>
