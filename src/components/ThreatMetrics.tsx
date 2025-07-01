@@ -5,6 +5,7 @@ import { useThreat } from "@/context/ThreatContext";
 import { useNavigate } from "react-router-dom";
 import { Shield, AlertTriangle, Users } from "lucide-react";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const ThreatMetrics = () => {
   const { threats, stats } = useThreat();
@@ -12,6 +13,7 @@ export const ThreatMetrics = () => {
   const [blockedThreats, setBlockedThreats] = useState<any[]>([]);
   const [blockedToday, setBlockedToday] = useState(0);
   const [showBlockedThreats, setShowBlockedThreats] = useState(false);
+  const [activeUsers, setActiveUsers] = useState(0);
 
   useEffect(() => {
     // Filter threats that are high or critical risk (automatically blocked)
@@ -28,6 +30,30 @@ export const ThreatMetrics = () => {
     });
     setBlockedToday(todayBlocked.length);
   }, [threats]);
+
+  useEffect(() => {
+    // Get actual count of unique users who have submitted threats
+    const fetchActiveUsers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('threats')
+          .select('user_id')
+          .not('user_id', 'is', null);
+
+        if (error) throw error;
+
+        // Count unique users
+        const uniqueUsers = new Set(data?.map(threat => threat.user_id) || []);
+        setActiveUsers(uniqueUsers.size);
+      } catch (error) {
+        console.error('Error fetching active users:', error);
+        // Fallback to stats if query fails
+        setActiveUsers(stats.activeUsers);
+      }
+    };
+
+    fetchActiveUsers();
+  }, [threats, stats.activeUsers]);
 
   const handleTotalThreatsClick = () => {
     setShowBlockedThreats(!showBlockedThreats);
@@ -58,7 +84,7 @@ export const ThreatMetrics = () => {
     },
     {
       title: "Active Community",
-      value: stats.activeUsers.toString(),
+      value: activeUsers.toString(),
       icon: Users,
       color: "text-purple-400",
       bgColor: "bg-purple-400/10",

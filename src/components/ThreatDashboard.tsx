@@ -8,7 +8,7 @@ import { RealtimeChart } from "./RealtimeChart";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const ThreatDashboard = () => {
-  const { threats, stats, loading } = useThreat();
+  const { threats, loading } = useThreat();
 
   const getRiskColor = (level: string) => {
     switch (level) {
@@ -52,40 +52,41 @@ export const ThreatDashboard = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-          {threats.slice(0, 10).map((threat) => (
-            <div
-              key={threat.id}
-              className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-800/50 hover:border-green-500/50 transition-all"
-            >
-              <div className="flex-1">
-                <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${getRiskColor(threat.risk_level)}`}></div>
-                  <span className="text-white font-medium capitalize">{threat.type}</span>
-                  <Badge 
-                    variant="outline" 
-                    className={`${getRiskColor(threat.risk_level)} border-0 text-white text-xs`}
-                  >
-                    {threat.risk_level}
-                  </Badge>
-                </div>
-                <p className="text-green-300 text-sm mt-1 truncate max-w-md">
-                  {threat.content}
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-green-400 text-xs">
-                  {threat.timestamp.toLocaleTimeString()}
-                </p>
-                {threat.location && (
-                  <p className="text-green-500 text-xs">{threat.location}</p>
-                )}
-              </div>
-            </div>
-          ))}
-          {threats.length === 0 && (
+          {threats.length === 0 ? (
             <div className="text-center py-8 text-green-400">
               No threats detected yet. Submit a URL or email to test the system.
             </div>
+          ) : (
+            threats.slice(0, 10).map((threat) => (
+              <div
+                key={threat.id}
+                className="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg border border-gray-800/50 hover:border-green-500/50 transition-all"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${getRiskColor(threat.risk_level)}`}></div>
+                    <span className="text-white font-medium capitalize">{threat.type}</span>
+                    <Badge 
+                      variant="outline" 
+                      className={`${getRiskColor(threat.risk_level)} border-0 text-white text-xs`}
+                    >
+                      {threat.risk_level}
+                    </Badge>
+                  </div>
+                  <p className="text-green-300 text-sm mt-1 truncate max-w-md">
+                    {threat.content}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-green-400 text-xs">
+                    {new Date(threat.created_at).toLocaleTimeString()}
+                  </p>
+                  {threat.location && (
+                    <p className="text-green-500 text-xs">{threat.location}</p>
+                  )}
+                </div>
+              </div>
+            ))
           )}
         </CardContent>
       </Card>

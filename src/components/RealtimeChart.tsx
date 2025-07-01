@@ -2,31 +2,83 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useState, useEffect } from "react";
+import { useThreat } from "@/context/ThreatContext";
 
 export const RealtimeChart = () => {
-  const [data, setData] = useState([
-    { time: "00:00", threats: 12 },
-    { time: "04:00", threats: 8 },
-    { time: "08:00", threats: 23 },
-    { time: "12:00", threats: 34 },
-    { time: "16:00", threats: 18 },
-    { time: "20:00", threats: 27 },
-    { time: "24:00", threats: 15 }
-  ]);
+  const { threats } = useThreat();
+  const [data, setData] = useState<Array<{ time: string; threats: number }>>([]);
 
   useEffect(() => {
+    // Generate 24-hour data based on actual threats
+    const generateHourlyData = () => {
+      const hourlyData = [];
+      const now = new Date();
+      
+      // Create 24 hourly buckets
+      for (let i = 23; i >= 0; i--) {
+        const hourStart = new Date(now);
+        hourStart.setHours(now.getHours() - i, 0, 0, 0);
+        const hourEnd = new Date(hourStart);
+        hourEnd.setHours(hourStart.getHours() + 1);
+        
+        // Count threats in this hour
+        const threatsInHour = threats.filter(threat => {
+          const threatTime = new Date(threat.created_at);
+          return threatTime >= hourStart && threatTime < hourEnd;
+        }).length;
+
+        hourlyData.push({
+          time: hourStart.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+          }),
+          threats: threatsInHour
+        });
+      }
+      
+      return hourlyData;
+    };
+
+    setData(generateHourlyData());
+  }, [threats]);
+
+  // Update data every 5 minutes to reflect new threats
+  useEffect(() => {
     const interval = setInterval(() => {
-      setData(prevData => {
-        const newData = [...prevData];
-        const lastEntry = newData[newData.length - 1];
-        const newThreats = Math.max(0, lastEntry.threats + Math.floor(Math.random() * 10) - 5);
-        newData[newData.length - 1] = { ...lastEntry, threats: newThreats };
-        return newData;
-      });
-    }, 3000);
+      const generateHourlyData = () => {
+        const hourlyData = [];
+        const now = new Date();
+        
+        for (let i = 23; i >= 0; i--) {
+          const hourStart = new Date(now);
+          hourStart.setHours(now.getHours() - i, 0, 0, 0);
+          const hourEnd = new Date(hourStart);
+          hourEnd.setHours(hourStart.getHours() + 1);
+          
+          const threatsInHour = threats.filter(threat => {
+            const threatTime = new Date(threat.created_at);
+            return threatTime >= hourStart && threatTime < hourEnd;
+          }).length;
+
+          hourlyData.push({
+            time: hourStart.toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: false 
+            }),
+            threats: threatsInHour
+          });
+        }
+        
+        return hourlyData;
+      };
+
+      setData(generateHourlyData());
+    }, 5 * 60 * 1000); // Update every 5 minutes
 
     return () => clearInterval(interval);
-  }, []);
+  }, [threats]);
 
   return (
     <Card className="bg-black/40 border-purple-500/30 backdrop-blur-lg">
