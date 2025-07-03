@@ -10,6 +10,7 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import BlockedThreats from "./pages/BlockedThreats";
 import ThreatOrigins from "./pages/ThreatOrigins";
+import FlowchartGenerator from "./pages/FlowchartGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/blocked-threats" element={<BlockedThreats />} />
           <Route path="/threat-origins" element={<ThreatOrigins />} />
+          <Route path="/flowchart-generator" element={<FlowchartGenerator />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -1,14 +1,17 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useThreat } from "@/context/ThreatContext";
 import { ThreatMetrics } from "./ThreatMetrics";
 import { ThreatMap } from "./ThreatMap";
 import { RealtimeChart } from "./RealtimeChart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useNavigate } from "react-router-dom";
+import { Wand2 } from "lucide-react";
 
 export const ThreatDashboard = () => {
   const { threats, loading } = useThreat();
+  const navigate = useNavigate();
 
   const getRiskColor = (level: string) => {
     switch (level) {
@@ -35,7 +38,16 @@ export const ThreatDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <ThreatMetrics />
+      <div className="flex justify-between items-center">
+        <ThreatMetrics />
+        <Button
+          onClick={() => navigate('/flowchart-generator')}
+          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+        >
+          <Wand2 className="w-4 h-4 mr-2" />
+          AI Flowchart Generator
+        </Button>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RealtimeChart />
