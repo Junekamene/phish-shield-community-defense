@@ -4,11 +4,10 @@ import { SubmissionPanel } from "@/components/SubmissionPanel";
 import { CommunityReports } from "@/components/CommunityReports";
 import { AlertSystem } from "@/components/AlertSystem";
 import { Header } from "@/components/Header";
-import { ThreatProvider } from "@/context/ThreatContext";
+
 
 const Dashboard = () => {
   return (
-    <ThreatProvider>
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black">
         <div className="absolute inset-0 opacity-20">
           <div className="w-full h-full" style={{
@@ -33,7 +32,6 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-    </ThreatProvider>
   );
 };
 

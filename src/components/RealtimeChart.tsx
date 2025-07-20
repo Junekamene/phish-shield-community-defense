@@ -2,10 +2,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
 import { useState, useEffect } from "react";
-import { useThreat } from "@/context/ThreatContext";
+
 
 export const RealtimeChart = () => {
-  const { threats } = useThreat();
   const [data, setData] = useState<Array<{ time: string; threats: number }>>([]);
 
   useEffect(() => {
@@ -21,11 +20,8 @@ export const RealtimeChart = () => {
         const hourEnd = new Date(hourStart);
         hourEnd.setHours(hourStart.getHours() + 1);
         
-        // Count threats in this hour
-        const threatsInHour = threats.filter(threat => {
-          const threatTime = new Date(threat.created_at);
-          return threatTime >= hourStart && threatTime < hourEnd;
-        }).length;
+        // Mock threats count
+        const threatsInHour = Math.floor(Math.random() * 3);
 
         hourlyData.push({
           time: hourStart.toLocaleTimeString('en-US', { 
@@ -41,7 +37,7 @@ export const RealtimeChart = () => {
     };
 
     setData(generateHourlyData());
-  }, [threats]);
+  }, []);
 
   // Update data every 5 minutes to reflect new threats
   useEffect(() => {
@@ -56,10 +52,7 @@ export const RealtimeChart = () => {
           const hourEnd = new Date(hourStart);
           hourEnd.setHours(hourStart.getHours() + 1);
           
-          const threatsInHour = threats.filter(threat => {
-            const threatTime = new Date(threat.created_at);
-            return threatTime >= hourStart && threatTime < hourEnd;
-          }).length;
+          const threatsInHour = Math.floor(Math.random() * 3);
 
           hourlyData.push({
             time: hourStart.toLocaleTimeString('en-US', { 
@@ -78,7 +71,7 @@ export const RealtimeChart = () => {
     }, 5 * 60 * 1000); // Update every 5 minutes
 
     return () => clearInterval(interval);
-  }, [threats]);
+  }, []);
 
   return (
     <Card className="bg-black/40 border-purple-500/30 backdrop-blur-lg">

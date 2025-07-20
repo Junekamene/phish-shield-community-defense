@@ -2,13 +2,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useThreat } from "@/context/ThreatContext";
+
 import { useState, useEffect } from "react";
 import { ArrowLeft, Globe, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const ThreatOrigins = () => {
-  const { threats } = useThreat();
   const navigate = useNavigate();
   const [threatLocations, setThreatLocations] = useState<Array<{
     country: string;
@@ -22,20 +21,19 @@ const ThreatOrigins = () => {
     const locationCounts: { [key: string]: { count: number; risks: { [key: string]: number } } } = {};
     let totalThreats = 0;
 
-    threats.forEach(threat => {
-      if (threat.location && threat.location !== 'API Detection' && threat.location !== 'Community Report') {
-        const country = threat.location.includes(',') 
-          ? threat.location.split(',').pop()?.trim() || threat.location
-          : threat.location;
-        
-        if (!locationCounts[country]) {
-          locationCounts[country] = { count: 0, risks: {} };
-        }
-        
-        locationCounts[country].count++;
-        locationCounts[country].risks[threat.risk_level] = (locationCounts[country].risks[threat.risk_level] || 0) + 1;
-        totalThreats++;
-      }
+    // Mock threat locations data
+    const mockCountries = ['Russia', 'China', 'Nigeria', 'United States', 'Brazil', 'India'];
+    mockCountries.forEach(country => {
+      const count = Math.floor(Math.random() * 15) + 1;
+      const risks = {
+        critical: Math.floor(Math.random() * 3),
+        high: Math.floor(Math.random() * 5),
+        medium: Math.floor(Math.random() * 4),
+        low: Math.floor(Math.random() * 3)
+      };
+      
+      locationCounts[country] = { count, risks };
+      totalThreats += count;
     });
 
     // Convert to array with detailed risk breakdown
@@ -49,7 +47,7 @@ const ThreatOrigins = () => {
       .sort((a, b) => b.threats - a.threats);
 
     setThreatLocations(locationArray);
-  }, [threats]);
+  }, []);
 
   const getRiskColor = (level: string) => {
     switch (level) {

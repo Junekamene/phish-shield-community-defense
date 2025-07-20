@@ -1,13 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useThreat } from "@/context/ThreatContext";
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ExternalLink } from "lucide-react";
 
 export const ThreatMap = () => {
-  const { threats } = useThreat();
   const navigate = useNavigate();
   const [threatLocations, setThreatLocations] = useState<Array<{
     country: string;
@@ -20,16 +19,11 @@ export const ThreatMap = () => {
     const locationCounts: { [key: string]: number } = {};
     let totalThreats = 0;
 
-    threats.forEach(threat => {
-      if (threat.location && threat.location !== 'API Detection' && threat.location !== 'Community Report') {
-        // Extract country from location or use the location as country
-        const country = threat.location.includes(',') 
-          ? threat.location.split(',').pop()?.trim() || threat.location
-          : threat.location;
-        
-        locationCounts[country] = (locationCounts[country] || 0) + 1;
-        totalThreats++;
-      }
+    // Mock threat locations
+    const mockLocations = ['Russia', 'China', 'Nigeria', 'United States'];
+    mockLocations.forEach(country => {
+      locationCounts[country] = Math.floor(Math.random() * 10) + 1;
+      totalThreats += locationCounts[country];
     });
 
     // Convert to array and calculate percentages
@@ -54,7 +48,7 @@ export const ThreatMap = () => {
     }
 
     setThreatLocations(locationArray);
-  }, [threats]);
+  }, []);
 
   const handleViewAllOrigins = () => {
     navigate('/threat-origins');

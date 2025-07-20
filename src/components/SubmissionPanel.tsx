@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { useThreat } from "@/context/ThreatContext";
+
 import { CloudUpload, AlertTriangle, CheckCircle, Loader } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -18,7 +18,7 @@ export const SubmissionPanel = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [lastResult, setLastResult] = useState<{ type: string; risk: string; details: string } | null>(null);
   
-  const { analyzeThreat, submitCommunityReport } = useThreat();
+  
   const { toast } = useToast();
 
   const analyzeUrl = async () => {
@@ -28,25 +28,20 @@ export const SubmissionPanel = () => {
     console.log("Analyzing URL:", urlInput);
     
     try {
-      const result = await analyzeThreat(urlInput, 'url');
+      // Mock analysis
+      const risks = ['low', 'medium', 'high', 'critical'];
+      const randomRisk = risks[Math.floor(Math.random() * risks.length)];
       
-      const analysisDetails = {
-        low: "URL appears safe. No suspicious patterns detected.",
-        medium: "Some minor red flags detected. Exercise caution.",
-        high: "Multiple phishing indicators found. Likely malicious!",
-        critical: "DANGER: Confirmed phishing site with active threats!"
-      };
-
       setLastResult({
         type: "URL Analysis",
-        risk: result.analysis.riskLevel,
-        details: result.analysis.recommendation
+        risk: randomRisk,
+        details: "Mock analysis complete"
       });
 
       toast({
         title: "URL Analysis Complete",
-        description: `Risk Level: ${result.analysis.riskLevel.toUpperCase()}`,
-        variant: result.analysis.riskLevel === 'high' || result.analysis.riskLevel === 'critical' ? "destructive" : "default"
+        description: `Risk Level: ${randomRisk.toUpperCase()}`,
+        variant: randomRisk === 'high' || randomRisk === 'critical' ? "destructive" : "default"
       });
       
     } catch (error) {
@@ -69,18 +64,20 @@ export const SubmissionPanel = () => {
     console.log("Analyzing email content");
     
     try {
-      const result = await analyzeThreat(emailContent, 'email');
+      // Mock analysis
+      const risks = ['low', 'medium', 'high', 'critical'];
+      const randomRisk = risks[Math.floor(Math.random() * risks.length)];
       
       setLastResult({
         type: "Email Analysis",
-        risk: result.analysis.riskLevel,
-        details: result.analysis.recommendation
+        risk: randomRisk,
+        details: "Mock analysis complete"
       });
 
       toast({
         title: "Email Analysis Complete",
-        description: `Risk Level: ${result.analysis.riskLevel.toUpperCase()}`,
-        variant: result.analysis.riskLevel === 'high' || result.analysis.riskLevel === 'critical' ? "destructive" : "default"
+        description: `Risk Level: ${randomRisk.toUpperCase()}`,
+        variant: randomRisk === 'high' || randomRisk === 'critical' ? "destructive" : "default"
       });
       
     } catch (error) {
@@ -102,8 +99,7 @@ export const SubmissionPanel = () => {
     setIsAnalyzing(true);
     
     try {
-      await submitCommunityReport(communityUrl, communityDescription);
-      
+      // Mock submission
       toast({
         title: "Report Submitted",
         description: "Thank you for contributing to community safety!",

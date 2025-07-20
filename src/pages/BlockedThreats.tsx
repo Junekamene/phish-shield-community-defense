@@ -5,20 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Shield, AlertTriangle, Calendar } from "lucide-react";
-import { useThreat } from "@/context/ThreatContext";
+
 
 const BlockedThreats = () => {
   const navigate = useNavigate();
-  const { threats } = useThreat();
   const [blockedThreats, setBlockedThreats] = useState<any[]>([]);
 
   useEffect(() => {
-    // Filter threats that are high or critical risk (automatically blocked)
-    const blocked = threats.filter(threat => 
-      threat.risk_level === 'high' || threat.risk_level === 'critical'
-    );
-    setBlockedThreats(blocked);
-  }, [threats]);
+    // Mock blocked threats
+    setBlockedThreats([]);
+  }, []);
 
   const getRiskColor = (level: string) => {
     switch (level) {

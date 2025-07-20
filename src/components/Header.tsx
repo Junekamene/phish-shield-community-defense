@@ -1,9 +1,8 @@
 
 import { Shield, Bell, Users } from "lucide-react";
-import { useThreat } from "@/context/ThreatContext";
+
 
 export const Header = () => {
-  const { stats, alerts } = useThreat();
 
   return (
     <header className="bg-black/30 backdrop-blur-lg border-b border-green-500/30">
@@ -23,16 +22,11 @@ export const Header = () => {
           <div className="flex items-center space-x-6">
             <div className="flex items-center space-x-2 text-green-300">
               <Users className="w-4 h-4" />
-              <span className="text-sm">{stats.activeUsers} Active</span>
+              <span className="text-sm">1 Active</span>
             </div>
             
             <div className="relative">
               <Bell className="w-5 h-5 text-green-400 hover:text-green-300 cursor-pointer transition-colors" />
-              {alerts.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {alerts.length}
-                </span>
-              )}
             </div>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { useThreat } from "@/context/ThreatContext";
+
 // Mock community reports
 import { Users, Flag, CheckCircle } from "lucide-react";
 
@@ -23,7 +23,7 @@ export const CommunityReports = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [communityReports, setCommunityReports] = useState<CommunityReport[]>([]);
   const [loading, setLoading] = useState(true);
-  const { submitCommunityReport } = useThreat();
+  
 
   const fetchCommunityReports = async () => {
     try {
@@ -64,10 +64,9 @@ export const CommunityReports = () => {
     console.log("Submitting community report:", reportUrl, description);
     
     try {
-      await submitCommunityReport(reportUrl, description || "Community reported threat");
+      // Mock submission
       setReportUrl("");
       setDescription("");
-      // Reports will be refreshed via real-time subscription
     } catch (error) {
       console.error('Error submitting community report:', error);
     } finally {
