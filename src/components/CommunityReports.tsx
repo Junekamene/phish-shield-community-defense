@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { useThreat } from "@/context/ThreatContext";
-import { supabase } from "@/integrations/supabase/client";
+// Mock community reports
 import { Users, Flag, CheckCircle } from "lucide-react";
 
 interface CommunityReport {
@@ -27,15 +27,25 @@ export const CommunityReports = () => {
 
   const fetchCommunityReports = async () => {
     try {
-      const { data, error } = await supabase
-        .from('community_reports')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(4);
+      // Mock community reports data
+      const mockReports = [
+        {
+          id: "1",
+          url: "https://suspicious-site.com",
+          votes: 15,
+          status: "verified",
+          created_at: new Date().toISOString()
+        },
+        {
+          id: "2", 
+          url: "https://fake-bank.net",
+          votes: 8,
+          status: "pending",
+          created_at: new Date(Date.now() - 3600000).toISOString()
+        }
+      ];
 
-      if (error) throw error;
-
-      setCommunityReports(data || []);
+      setCommunityReports(mockReports);
     } catch (error) {
       console.error('Error fetching community reports:', error);
     } finally {
@@ -45,22 +55,6 @@ export const CommunityReports = () => {
 
   useEffect(() => {
     fetchCommunityReports();
-
-    // Set up real-time subscription for new community reports
-    const channel = supabase
-      .channel('community-reports-changes')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'community_reports'
-      }, () => {
-        fetchCommunityReports();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
   const handleSubmitReport = async () => {

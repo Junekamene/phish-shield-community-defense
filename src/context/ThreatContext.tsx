@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { useSupabaseThreats, ThreatData, ThreatStats } from "@/hooks/useSupabaseThreats";
+import { useMockThreats, ThreatData, ThreatStats } from "@/hooks/useMockThreats";
 
 interface ThreatContextType {
   threats: ThreatData[];
@@ -16,7 +16,7 @@ interface ThreatContextType {
 const ThreatContext = createContext<ThreatContextType | undefined>(undefined);
 
 export const ThreatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { threats, stats, loading, analyzeThreat, submitCommunityReport } = useSupabaseThreats();
+  const { threats, stats, loading, analyzeThreat, submitCommunityReport } = useMockThreats();
   const [alerts, setAlerts] = useState<Array<{ id: string; message: string; type: string; timestamp: Date }>>([]);
 
   // Keep for backward compatibility with existing components

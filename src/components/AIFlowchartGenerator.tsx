@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
+// Mock AI flowchart generation
 import { Canvas as FabricCanvas, Rect, Circle, Text, Line } from "fabric";
 import { Loader, Wand2, Download, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -81,14 +81,33 @@ export const AIFlowchartGenerator = () => {
     setIsGenerating(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('generate-flowchart', {
-        body: { workflow: workflowText }
-      });
+      // Mock flowchart generation with sample data
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const mockFlowchartSpec: FlowchartSpec = {
+        nodes: [
+          { id: '1', label: 'User Submission', type: 'start' as const, position: { x: 100, y: 50 }, color: '#4ade80' },
+          { id: '2', label: 'Content Validation', type: 'process' as const, position: { x: 100, y: 150 }, color: '#60a5fa' },
+          { id: '3', label: 'AI Analysis', type: 'process' as const, position: { x: 100, y: 250 }, color: '#60a5fa' },
+          { id: '4', label: 'Risk Level?', type: 'decision' as const, position: { x: 100, y: 350 }, color: '#fbbf24' },
+          { id: '5', label: 'Block Threat', type: 'process' as const, position: { x: 50, y: 450 }, color: '#ef4444' },
+          { id: '6', label: 'Monitor', type: 'process' as const, position: { x: 150, y: 450 }, color: '#60a5fa' },
+          { id: '7', label: 'Update Dashboard', type: 'end' as const, position: { x: 100, y: 550 }, color: '#10b981' }
+        ],
+        connections: [
+          { from: '1', to: '2', label: '' },
+          { from: '2', to: '3', label: '' },
+          { from: '3', to: '4', label: '' },
+          { from: '4', to: '5', label: 'High/Critical' },
+          { from: '4', to: '6', label: 'Low/Medium' },
+          { from: '5', to: '7', label: '' },
+          { from: '6', to: '7', label: '' }
+        ],
+        layout: { width: 400, height: 600 }
+      };
 
-      if (error) throw error;
-
-      setFlowchartSpec(data.flowchartSpec);
-      drawFlowchart(data.flowchartSpec);
+      setFlowchartSpec(mockFlowchartSpec);
+      drawFlowchart(mockFlowchartSpec);
       
       toast({
         title: "Flowchart Generated!",
